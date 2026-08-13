@@ -1,0 +1,13 @@
+name = "url-shortener"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# KV 命名空间：先运行 `wrangler kv namespace create LINKS` 获取 id 填入下方
+[[kv_namespaces]]
+binding = "LINKS"
+id = "REPLACE_WITH_YOUR_KV_ID"
+
+# ADMIN_TOKEN 不要写在这里（公开仓库）。
+# 生产（含 GitHub 原生集成部署）：在 Cloudflare 控制台将该 Worker 的
+#   "Settings → Variables → ADMIN_TOKEN" 设为 secret 变量。
+# 本地开发：在项目根目录创建 .dev.vars，内容：ADMIN_TOKEN=你的token
