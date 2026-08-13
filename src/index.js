@@ -302,7 +302,7 @@ function submitLogin(){
   el('loginMsg').textContent = '';
   validateToken(t,
     function(){ closeLogin(); setLoggedIn(true); loadList(true); },
-    function(){ el('loginMsg').textContent = 'Token 无效，请确认 Cloudflare 中 ADMIN_TOKEN 与此一致'; }
+    function(){ el('loginMsg').textContent = 'Token 无效，请重试'; }
   );
 }
 function toggleLogin(){
