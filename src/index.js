@@ -111,89 +111,103 @@ const ADMIN_HTML = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>短链服务</title>
-<style>
+<title>短链 · 极简短链接服务</title>
+  <style>
   * { box-sizing: border-box; }
   :root{
-    --card:#fff; --ink:#1a1a1a; --muted:#8a8f98; --line:#e8ebef;
-    --primary:#111; --danger:#e5484d; --accent:#4f46e5;
+    --card:#fff; --ink:#0f172a; --muted:#64748b; --line:#e7ebf0;
+    --primary:#111827; --primary-hover:#1f2937;
+    --accent:#4f46e5; --accent-soft:#eef2ff;
+    --danger:#e5484d; --danger-soft:#fef2f2;
   }
   html, body { margin:0; padding:0; }
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
-    background:linear-gradient(180deg,#f7f9fc 0%,#eef1f6 100%);
+    background:radial-gradient(1200px 600px at 50% -10%, #eef2ff 0%, #f7f9fc 45%, #eef1f6 100%);
     color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
   }
-  header{ display:flex; align-items:center; justify-content:space-between; padding:18px 24px; max-width:720px; margin:0 auto; }
-  .brand{ font-weight:700; font-size:16px; letter-spacing:.3px; }
-  main{ max-width:560px; margin:4vh auto 60px; padding:0 20px; }
-  .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px; box-shadow:0 10px 30px rgba(20,30,50,.06); margin-bottom:20px; }
-  h1{ font-size:22px; font-weight:700; margin:0 0 6px; }
+  header{ display:flex; align-items:center; justify-content:space-between; padding:18px 24px; max-width:760px; margin:0 auto; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; letter-spacing:.2px; }
+  .logo{ width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,#6366f1,#4f46e5); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(79,70,229,.35); }
+  .logo svg{ width:17px; height:17px; }
+  main{ max-width:560px; margin:6vh auto 60px; padding:0 20px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:32px; box-shadow:0 12px 40px rgba(15,23,42,.08); margin-bottom:18px; }
+  h1{ font-size:26px; font-weight:800; margin:0 0 8px; letter-spacing:-.3px; }
   h2{ font-size:16px; font-weight:700; margin:0; }
-  .sub{ color:var(--muted); font-size:13px; margin:0 0 18px; }
+  .sub{ color:var(--muted); font-size:14px; margin:0 0 22px; line-height:1.6; }
   .row{ display:flex; gap:10px; }
+  .row input{ flex:1; }
   input, textarea{
-    width:100%; font-size:15px; color:var(--ink); background:#fbfbfc;
-    border:1px solid var(--line); border-radius:12px; padding:13px 15px; outline:none;
-    transition:border-color .15s, box-shadow .15s; font-family:inherit;
+    width:100%; font-size:15px; color:var(--ink); background:#fbfcfe;
+    border:1px solid var(--line); border-radius:12px; padding:14px 16px; outline:none;
+    transition:border-color .15s, box-shadow .15s, background .15s; font-family:inherit;
   }
-  input:focus, textarea:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(17,17,17,.08); background:#fff; }
-  textarea{ resize:vertical; min-height:96px; line-height:1.5; }
-  .field{ margin-top:14px; }
-  label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+  input:focus, textarea:focus{ border-color:var(--accent); box-shadow:0 0 0 4px rgba(79,70,229,.12); background:#fff; }
+  textarea{ resize:vertical; min-height:96px; line-height:1.6; }
+  .field{ margin-top:16px; }
+  label{ display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500; }
+  .hint{ color:var(--muted); font-size:12.5px; margin:12px 2px 0; }
   .btn-primary{
     background:var(--primary); color:#fff; border:none; border-radius:12px;
-    padding:0 22px; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap; height:48px;
-    transition:opacity .15s;
+    padding:0 22px; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap; height:50px;
+    transition:background .15s, transform .05s; display:inline-flex; align-items:center; justify-content:center;
   }
-  .btn-primary:hover{ opacity:.88; }
+  .btn-primary:hover{ background:var(--primary-hover); }
+  .btn-primary:active{ transform:translateY(1px); }
+  .btn-primary:disabled{ opacity:.6; cursor:default; }
   button{ font-family:inherit; }
   .btn-ghost{
     background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:10px;
     padding:9px 16px; font-size:14px; cursor:pointer; transition:background .15s, border-color .15s;
   }
   .btn-ghost:hover{ background:#f6f7f9; border-color:#d8dce2; }
-  .btn-ghost.sm{ padding:6px 12px; font-size:13px; }
+  .btn-ghost.sm{ padding:7px 13px; font-size:13px; }
   .header-actions{ display:flex; align-items:center; gap:10px; }
-  .copy-btn{ background:var(--primary); color:#fff; border:none; border-radius:9px; padding:7px 14px; font-size:13px; cursor:pointer; white-space:nowrap; margin-left:10px; }
-  .copy-btn:hover{ opacity:.88; }
-  .btn-link{ background:none; border:none; color:var(--accent); font-size:13px; cursor:pointer; padding:14px 0 0; font-weight:600; }
-  #result{ margin-top:16px; }
+  .copy-btn{ background:var(--accent); color:#fff; border:none; border-radius:9px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; transition:opacity .15s; }
+  .copy-btn:hover{ opacity:.9; }
+  .btn-link{ background:none; border:none; color:var(--accent); font-size:13px; cursor:pointer; padding:14px 0 0; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+  .btn-link:hover{ text-decoration:underline; }
+  #result{ margin-top:18px; display:flex; flex-direction:column; }
   .item{
-    background:#fbfbfc; border:1px solid var(--line); border-radius:12px;
-    padding:14px 16px; margin-top:10px; word-break:break-all; overflow:hidden;
-    max-height:300px;
-    display:flex; justify-content:space-between; align-items:center; gap:12px;
-    transition:opacity .22s ease, transform .22s ease, max-height .22s ease, margin .22s ease, padding .22s ease;
+    display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-top:10px; word-break:break-all; overflow:hidden; max-height:300px;
+    transition:opacity .22s ease, transform .22s ease, max-height .22s ease, margin .22s ease, padding .22s ease, box-shadow .15s;
   }
+  .item:hover{ box-shadow:0 6px 18px rgba(15,23,42,.06); }
   .item.removing{ opacity:0; transform:translateX(10px); max-height:0; margin-top:0; padding-top:0; padding-bottom:0; border-color:transparent; }
-  .item a.code{ font-weight:700; color:var(--ink); text-decoration:none; font-size:15px; }
-  .item a.code:hover{ text-decoration:underline; }
+  .item .meta{ flex:1; min-width:0; }
+  .item .surl{ font-weight:700; color:var(--ink); text-decoration:none; font-size:15.5px; display:inline-flex; align-items:center; gap:6px; }
+  .item .surl:hover{ color:var(--accent); }
+  .item .orig{ color:var(--muted); font-size:12.5px; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .muted{ color:var(--muted); font-size:12.5px; margin-top:4px; }
-  .list-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .tag{ display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; margin-left:8px; vertical-align:middle; }
-  .tag.public{ background:#eef2ff; color:#4f46e5; }
+  .tag{ display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; margin-left:8px; vertical-align:middle; font-weight:600; }
+  .tag.public{ background:var(--accent-soft); color:#4f46e5; }
   .tag.admin{ background:#ecfdf3; color:#067647; }
-  .del{ background:var(--danger); color:#fff; border:none; border-radius:9px; padding:7px 13px; font-size:13px; cursor:pointer; white-space:nowrap; }
-  .del:hover{ opacity:.9; }
-  .empty{ color:var(--muted); text-align:center; padding:24px 0; font-size:14px; }
+  .del{ background:var(--danger-soft); color:var(--danger); border:1px solid #fbd5d7; border-radius:9px; padding:7px 14px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; transition:background .15s; }
+  .del:hover{ background:#fde8e8; }
+  .empty{ color:var(--muted); text-align:center; padding:32px 0; font-size:14px; }
   #msg{ margin:14px 2px; color:var(--danger); font-size:14px; min-height:1px; }
   .hidden{ display:none !important; }
-  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:50; }
-  .modal-mask{ position:absolute; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(2px); }
-  .modal-card{ position:relative; background:#fff; border-radius:18px; padding:26px; width:360px; max-width:90vw; max-height:86vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(15,23,42,.25); }
-  .modal-card.wide{ width:560px; }
-  .modal-card h3{ margin:0 0 4px; font-size:18px; }
+  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; animation:fade .18s ease; }
+  @keyframes fade{ from{opacity:0;} to{opacity:1;} }
+  .modal-mask{ position:absolute; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(3px); }
+  .modal-card{ position:relative; background:#fff; border-radius:20px; padding:26px; width:380px; max-width:100%; max-height:86vh; display:flex; flex-direction:column; box-shadow:0 24px 70px rgba(15,23,42,.28); animation:pop .2s ease; }
+  @keyframes pop{ from{ transform:translateY(10px) scale(.97); opacity:.5;} to{ transform:none; opacity:1;} }
+  .modal-card.wide{ width:580px; }
+  .modal-card h3{ margin:0 0 6px; font-size:19px; font-weight:800; }
   .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; }
   .modal-head-actions{ display:flex; gap:8px; }
-  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:18px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
   #list{ overflow-y:auto; flex:1; min-height:0; margin-top:2px; }
-  .modal-err{ color:var(--danger); font-size:13px; margin:10px 0 0; min-height:1px; }
-</style>
+  .modal-err{ color:var(--danger); font-size:13px; margin:12px 0 0; min-height:1px; }
+  </style>
 </head>
 <body>
 <header>
-  <div class="brand">短链</div>
+  <div class="brand">
+    <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></span>
+    短链
+  </div>
   <div class="header-actions">
     <button id="manageBtn" class="btn-ghost sm hidden">管理</button>
     <button id="loginBtn" class="btn-ghost">登录</button>
@@ -201,26 +215,27 @@ const ADMIN_HTML = `<!doctype html>
 </header>
 <main>
   <div class="card">
-    <h1>短链接</h1>
-    <p class="sub">把长链接变成清爽的短链接</p>
+    <h1>把长链接，变成短链接</h1>
+    <p class="sub">粘贴任意网址，立即获得一个清爽、易分享的短网址。</p>
     <div class="row">
-      <input id="url" placeholder="粘贴要缩短的长链接…" />
-      <button id="genBtn" class="btn-primary">生成</button>
+      <input id="url" placeholder="粘贴长链接，如 https://example.com/very/long/path" />
+      <button id="genBtn" class="btn-primary">生成短链</button>
     </div>
+    <p class="hint">免登录即可生成 · 公开短链默认有效期 1 年</p>
 
     <div id="adminOnly" class="hidden">
-      <button id="advBtn" class="btn-link">高级选项 ▾</button>
+      <button id="advBtn" class="btn-link">更多选项 ▾</button>
       <div id="advPanel" class="hidden">
         <div class="field">
           <label>自定义短码（可选）</label>
-          <input id="custom" placeholder="例如：my-link" />
+          <input id="custom" placeholder="自定义后缀，如 promo" />
         </div>
         <div class="field">
-          <label>有效期（天，可选；留空=长期）</label>
-          <input id="expireDays" type="number" min="1" placeholder="例如：30" />
+          <label>有效期（天，留空则长期有效）</label>
+          <input id="expireDays" type="number" min="1" placeholder="如 30" />
         </div>
         <div class="field">
-          <label>批量生成（每行一个 URL）</label>
+          <label>批量生成（每行一个链接）</label>
           <textarea id="batch" placeholder="https://example.com/a&#10;https://example.com/b"></textarea>
         </div>
       </div>
@@ -236,7 +251,7 @@ const ADMIN_HTML = `<!doctype html>
   <div class="modal-mask"></div>
   <div class="modal-card wide">
     <div class="modal-head">
-      <h3>短链列表</h3>
+      <h3>短链管理</h3>
       <div class="modal-head-actions">
         <button id="allToggle" class="btn-ghost sm">我的</button>
         <button id="manageClose" class="btn-ghost sm">关闭</button>
@@ -250,8 +265,8 @@ const ADMIN_HTML = `<!doctype html>
 <div id="loginModal" class="modal hidden">
   <div class="modal-mask"></div>
   <div class="modal-card">
-    <h3>管理员登录</h3>
-    <p class="sub">输入管理员口令以管理短链</p>
+    <h3>管理员</h3>
+    <p class="sub">请输入管理员口令</p>
     <input id="tokenInput" type="password" placeholder="管理员口令" autocomplete="new-password" />
     <p id="loginMsg" class="modal-err"></p>
     <div class="modal-actions">
@@ -264,6 +279,7 @@ const ADMIN_HTML = `<!doctype html>
 var TOKEN = localStorage.getItem('admin_token') || '';
 var listCursor = null;
 var showAll = true;
+var lastSingleUrl = '';
 function el(id){ return document.getElementById(id); }
 function apiHeaders(){
   var h = { 'Content-Type': 'application/json' };
@@ -273,7 +289,7 @@ function apiHeaders(){
 function clearForm(){
   el('url').value = ''; el('result').innerHTML = '';
   el('custom').value = ''; el('expireDays').value = ''; el('batch').value = '';
-  el('advPanel').classList.add('hidden'); el('advBtn').textContent = '高级选项 ▾';
+  el('advPanel').classList.add('hidden'); el('advBtn').textContent = '更多选项 ▾';
   el('msg').textContent = '';
 }
 function setLoggedIn(on){
@@ -324,7 +340,7 @@ function toggleLogin(){
 }
 function toggleAdvanced(){
   var hidden = el('advPanel').classList.toggle('hidden');
-  el('advBtn').textContent = hidden ? '高级选项 ▾' : '高级选项 ▴';
+  el('advBtn').textContent = hidden ? '更多选项 ▾' : '更多选项 ▴';
 }
 function gen(){
   el('msg').textContent = '';
@@ -335,28 +351,35 @@ function gen(){
   if (isAdmin && batchVal){
     var urls = batchVal.split('\\n').map(function(s){ return s.trim(); }).filter(Boolean);
     endpoint = '/api/admin/shorten'; body = { urls: urls };
+    lastSingleUrl = '';
   } else if (isAdmin){
     endpoint = '/api/admin/shorten'; body = { url: urlVal };
     var custom = el('custom').value.trim();
     var days = el('expireDays').value.trim();
     if (custom) body.custom = custom;
     if (days) body.expireDays = parseInt(days, 10);
+    lastSingleUrl = urlVal;
   } else {
     endpoint = '/api/shorten'; body = { url: urlVal };
+    lastSingleUrl = urlVal;
   }
+  var btn = el('genBtn'); var old = btn.textContent;
+  btn.disabled = true; btn.textContent = '生成中…';
   fetch(endpoint, { method:'POST', headers: apiHeaders(), body: JSON.stringify(body) })
     .then(function(r){ return r.json(); })
     .then(renderResult)
-    .catch(function(e){ el('msg').textContent = '网络异常，请重试'; });
+    .catch(function(e){ el('msg').textContent = '网络异常，请重试'; })
+    .finally(function(){ btn.disabled = false; btn.textContent = old; });
 }
-function linkRow(shortUrl){
+function linkRow(shortUrl, orig){
   var d = document.createElement('div'); d.className = 'item';
-  var left = document.createElement('div'); left.style.flex = '1'; left.style.minWidth = '0';
-  var a = document.createElement('a'); a.className = 'code'; a.href = shortUrl; a.target = '_blank'; a.textContent = shortUrl;
-  left.appendChild(a);
+  var meta = document.createElement('div'); meta.className = 'meta';
+  var a = document.createElement('a'); a.className = 'surl'; a.href = shortUrl; a.target = '_blank'; a.textContent = shortUrl;
+  meta.appendChild(a);
+  if (orig){ var o = document.createElement('div'); o.className = 'orig'; o.textContent = orig; meta.appendChild(o); }
   var copy = document.createElement('button'); copy.className = 'copy-btn'; copy.textContent = '复制';
   copy.onclick = function(){ copyText(shortUrl, copy); };
-  d.appendChild(left); d.appendChild(copy);
+  d.appendChild(meta); d.appendChild(copy);
   return d;
 }
 function copyText(text, btn){
@@ -379,14 +402,14 @@ function renderResult(data){
   if (data.error){ el('msg').textContent = data.error; return; }
   if (data.results){
     data.results.forEach(function(it){
-      if (it.error){ var d = document.createElement('div'); d.className = 'item'; d.textContent = it.url + ' → ' + it.error; box.appendChild(d); }
-      else { box.appendChild(linkRow(it.shortUrl)); }
+      if (it.error){ var d = document.createElement('div'); d.className = 'item'; d.style.flexDirection = 'column'; d.style.alignItems = 'flex-start'; d.style.gap = '4px'; d.textContent = it.url + ' → ' + it.error; box.appendChild(d); }
+      else { box.appendChild(linkRow(it.shortUrl, it.url)); }
     });
     if (TOKEN) loadList(true);
     return;
   }
   if (data.shortUrl){
-    box.appendChild(linkRow(data.shortUrl));
+    box.appendChild(linkRow(data.shortUrl, lastSingleUrl));
     if (TOKEN) loadList(true);
   }
 }
@@ -397,7 +420,7 @@ function loadList(reset){
   fetch('/api/admin/links' + q, { headers: apiHeaders() })
     .then(function(r){ return r.json(); })
     .then(function(data){
-      if (reset && (!data.links || !data.links.length)){ el('list').innerHTML = '<div class="empty">暂无短链，去生成一个吧</div>'; }
+      if (reset && (!data.links || !data.links.length)){ el('list').innerHTML = '<div class="empty">还没有短链，去首页生成一个吧</div>'; }
       else { (data.links || []).forEach(addRow); }
       listCursor = data.cursor;
       el('moreBtn').classList.toggle('hidden', !listCursor);
@@ -411,12 +434,14 @@ function toggleAll(){
 }
 function addRow(link){
   var row = document.createElement('div'); row.className = 'item'; row.dataset.code = link.code;
-  var left = document.createElement('div'); left.style.flex = '1'; left.style.minWidth = '0';
-  var a = document.createElement('a'); a.className = 'code'; a.href = '/' + link.code; a.target = '_blank'; a.textContent = '/' + link.code;
-  var u = document.createElement('div'); u.className = 'muted'; u.textContent = link.url;
-  var exp = document.createElement('div'); exp.className = 'muted';
-  exp.textContent = link.expireAt ? ('过期: ' + new Date(link.expireAt).toLocaleString()) : '永久';
-  left.appendChild(a); left.appendChild(u); left.appendChild(exp);
+  var meta = document.createElement('div'); meta.className = 'meta';
+  var a = document.createElement('a'); a.className = 'surl'; a.href = '/' + link.code; a.target = '_blank'; a.textContent = '/' + link.code;
+  meta.appendChild(a);
+  var u = document.createElement('div'); u.className = 'orig'; u.textContent = link.url;
+  meta.appendChild(u);
+  var exp = document.createElement('div'); exp.className = 'orig';
+  exp.textContent = link.expireAt ? ('有效期至 ' + new Date(link.expireAt).toLocaleString()) : '长期有效';
+  meta.appendChild(exp);
   if (showAll){
     var tag = document.createElement('span');
     tag.className = 'tag ' + (link.source === 'public' ? 'public' : 'admin');
@@ -425,7 +450,7 @@ function addRow(link){
   }
   var del = document.createElement('button'); del.className = 'del'; del.textContent = '删除';
   del.onclick = function(){ delLink(link); };
-  row.appendChild(left); row.appendChild(del);
+  row.appendChild(meta); row.appendChild(del);
   el('list').appendChild(row);
 }
 function delLink(link){
@@ -489,7 +514,7 @@ const NOT_FOUND_HTML = `<!doctype html>
 <body>
   <div class="card">
     <p class="code">404</p>
-    <p class="sub">短链接不存在或已过期</p>
+    <p class="sub">这个短链接不存在或已过期</p>
     <a href="/">返回首页</a>
   </div>
 </body>
