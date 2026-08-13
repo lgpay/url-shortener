@@ -283,11 +283,22 @@ function openManage(){
   loadList(true);
 }
 function closeManage(){ el('manageModal').classList.add('hidden'); }
+function validateToken(t, onOk, onFail){
+  fetch('/api/admin/links?scope=all&limit=1', { headers: { 'Authorization': 'Bearer ' + t } })
+    .then(function(r){
+      if (r.ok){ TOKEN = t; localStorage.setItem('admin_token', TOKEN); onOk(); }
+      else { TOKEN = ''; localStorage.removeItem('admin_token'); if (onFail) onFail(); }
+    })
+    .catch(function(e){ TOKEN = ''; localStorage.removeItem('admin_token'); if (onFail) onFail(e); });
+}
 function submitLogin(){
   var t = el('tokenInput').value.trim();
   if (!t) return;
-  TOKEN = t; localStorage.setItem('admin_token', TOKEN);
-  closeLogin(); setLoggedIn(true); loadList(true);
+  el('msg').textContent = '';
+  validateToken(t,
+    function(){ closeLogin(); setLoggedIn(true); loadList(true); },
+    function(){ el('msg').textContent = 'Token 无效，请确认 Cloudflare 中 ADMIN_TOKEN 与此一致'; }
+  );
 }
 function toggleLogin(){
   if (TOKEN){ TOKEN = ''; localStorage.removeItem('admin_token'); setLoggedIn(false); }
@@ -432,7 +443,7 @@ el('advBtn').onclick = toggleAdvanced;
 el('allToggle').onclick = toggleAll;
 el('moreBtn').onclick = function(){ loadList(false); };
 el('tokenInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') submitLogin(); });
-if (TOKEN) setLoggedIn(true);
+if (TOKEN) validateToken(TOKEN, function(){ setLoggedIn(true); loadList(true); });
 </script>
 </body>
 </html>`;
