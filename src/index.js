@@ -146,7 +146,6 @@ const ADMIN_HTML = `<!doctype html>
   textarea{ resize:vertical; min-height:96px; line-height:1.6; }
   .field{ margin-top:16px; }
   label{ display:block; font-size:13px; color:var(--muted); margin-bottom:7px; font-weight:500; }
-  .hint{ color:var(--muted); font-size:12.5px; margin:12px 2px 0; }
   .btn-primary{
     background:var(--primary); color:#fff; border:none; border-radius:12px;
     padding:0 22px; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap; height:50px;
@@ -216,26 +215,25 @@ const ADMIN_HTML = `<!doctype html>
 <main>
   <div class="card">
     <h1>把长链接，变成短链接</h1>
-    <p class="sub">粘贴任意网址，立即获得一个清爽、易分享的短网址。</p>
+    <p class="sub">生成易分享的短网址</p>
     <div class="row">
-      <input id="url" placeholder="粘贴长链接，如 https://example.com/very/long/path" />
+      <input id="url" placeholder="粘贴长链接…" />
       <button id="genBtn" class="btn-primary">生成短链</button>
     </div>
-    <p class="hint">免登录即可生成 · 公开短链默认有效期 1 年</p>
 
     <div id="adminOnly" class="hidden">
       <button id="advBtn" class="btn-link">更多选项 ▾</button>
       <div id="advPanel" class="hidden">
         <div class="field">
-          <label>自定义短码（可选）</label>
+          <label>自定义短码</label>
           <input id="custom" placeholder="自定义后缀，如 promo" />
         </div>
         <div class="field">
-          <label>有效期（天，留空则长期有效）</label>
+          <label>有效期（天）</label>
           <input id="expireDays" type="number" min="1" placeholder="如 30" />
         </div>
         <div class="field">
-          <label>批量生成（每行一个链接）</label>
+          <label>批量生成</label>
           <textarea id="batch" placeholder="https://example.com/a&#10;https://example.com/b"></textarea>
         </div>
       </div>
@@ -420,7 +418,7 @@ function loadList(reset){
   fetch('/api/admin/links' + q, { headers: apiHeaders() })
     .then(function(r){ return r.json(); })
     .then(function(data){
-      if (reset && (!data.links || !data.links.length)){ el('list').innerHTML = '<div class="empty">还没有短链，去首页生成一个吧</div>'; }
+      if (reset && (!data.links || !data.links.length)){ el('list').innerHTML = '<div class="empty">还没有短链</div>'; }
       else { (data.links || []).forEach(addRow); }
       listCursor = data.cursor;
       el('moreBtn').classList.toggle('hidden', !listCursor);
@@ -514,7 +512,7 @@ const NOT_FOUND_HTML = `<!doctype html>
 <body>
   <div class="card">
     <p class="code">404</p>
-    <p class="sub">这个短链接不存在或已过期</p>
+    <p class="sub">短链接不存在或已过期</p>
     <a href="/">返回首页</a>
   </div>
 </body>
