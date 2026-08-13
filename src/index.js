@@ -274,7 +274,15 @@ function setLoggedIn(on){
   el('loginBtn').textContent = on ? '退出' : '登录';
   el('adminOnly').classList.toggle('hidden', !on);
   el('manageBtn').classList.toggle('hidden', !on);
-  if (!on){ el('allToggle').textContent = '我的'; showAll = true; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); el('tokenInput').value = ''; }
+  if (!on){
+    el('allToggle').textContent = '我的'; showAll = true;
+    el('list').innerHTML = ''; el('manageModal').classList.add('hidden');
+    el('tokenInput').value = '';
+    el('url').value = ''; el('result').innerHTML = '';
+    el('custom').value = ''; el('expireDays').value = ''; el('batch').value = '';
+    el('advPanel').classList.add('hidden'); el('advBtn').textContent = '高级选项 ▾';
+    el('msg').textContent = '';
+  }
 }
 function openLogin(){
   el('loginModal').classList.remove('hidden');
