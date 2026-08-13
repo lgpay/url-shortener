@@ -154,6 +154,9 @@ const ADMIN_HTML = `<!doctype html>
   }
   .btn-ghost:hover{ background:#f6f7f9; border-color:#d8dce2; }
   .btn-ghost.sm{ padding:6px 12px; font-size:13px; }
+  .header-actions{ display:flex; align-items:center; gap:10px; }
+  .copy-btn{ background:var(--primary); color:#fff; border:none; border-radius:9px; padding:7px 14px; font-size:13px; cursor:pointer; white-space:nowrap; margin-left:10px; }
+  .copy-btn:hover{ opacity:.88; }
   .btn-link{ background:none; border:none; color:var(--accent); font-size:13px; cursor:pointer; padding:14px 0 0; font-weight:600; }
   #result{ margin-top:16px; }
   .item{
@@ -179,14 +182,20 @@ const ADMIN_HTML = `<!doctype html>
   .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:50; }
   .modal-mask{ position:absolute; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(2px); }
   .modal-card{ position:relative; background:#fff; border-radius:18px; padding:26px; width:360px; max-width:90vw; box-shadow:0 20px 60px rgba(15,23,42,.25); }
+  .modal-card.wide{ width:560px; }
   .modal-card h3{ margin:0 0 4px; font-size:18px; }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; }
+  .modal-head-actions{ display:flex; gap:8px; }
   .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:18px; }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">短链</div>
-  <button id="loginBtn" class="btn-ghost">登录</button>
+  <div class="header-actions">
+    <button id="manageBtn" class="btn-ghost sm hidden">管理</button>
+    <button id="loginBtn" class="btn-ghost">登录</button>
+  </div>
 </header>
 <main>
   <div class="card">
@@ -218,16 +227,23 @@ const ADMIN_HTML = `<!doctype html>
     <div id="result"></div>
   </div>
 
-  <div id="listWrap" class="card hidden">
-    <div class="list-head">
-      <h2>短链列表</h2>
-      <button id="allToggle" class="btn-ghost sm">管理所有短链</button>
+  <div id="msg"></div>
+</main>
+
+<div id="manageModal" class="modal hidden">
+  <div class="modal-mask"></div>
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <h3>短链列表</h3>
+      <div class="modal-head-actions">
+        <button id="allToggle" class="btn-ghost sm">管理所有短链</button>
+        <button id="manageClose" class="btn-ghost sm">关闭</button>
+      </div>
     </div>
     <div id="list"></div>
     <button id="moreBtn" class="btn-ghost sm hidden">加载更多</button>
   </div>
-  <div id="msg"></div>
-</main>
+</div>
 
 <div id="loginModal" class="modal hidden">
   <div class="modal-mask"></div>
@@ -254,14 +270,19 @@ function apiHeaders(){
 function setLoggedIn(on){
   el('loginBtn').textContent = on ? '退出' : '登录';
   el('adminOnly').classList.toggle('hidden', !on);
-  el('listWrap').classList.toggle('hidden', !on);
-  if (!on){ el('allToggle').textContent = '管理所有短链'; showAll = false; el('list').innerHTML = ''; }
+  el('manageBtn').classList.toggle('hidden', !on);
+  if (!on){ el('allToggle').textContent = '管理所有短链'; showAll = false; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); }
 }
 function openLogin(){
   el('loginModal').classList.remove('hidden');
   setTimeout(function(){ el('tokenInput').focus(); }, 50);
 }
 function closeLogin(){ el('loginModal').classList.add('hidden'); el('tokenInput').value = ''; }
+function openManage(){
+  el('manageModal').classList.remove('hidden');
+  loadList(true);
+}
+function closeManage(){ el('manageModal').classList.add('hidden'); }
 function submitLogin(){
   var t = el('tokenInput').value.trim();
   if (!t) return;
@@ -299,24 +320,44 @@ function gen(){
     .then(renderResult)
     .catch(function(e){ el('msg').textContent = '请求失败: ' + e; });
 }
+function linkRow(shortUrl){
+  var d = document.createElement('div'); d.className = 'item';
+  var left = document.createElement('div'); left.style.flex = '1'; left.style.minWidth = '0';
+  var a = document.createElement('a'); a.className = 'code'; a.href = shortUrl; a.target = '_blank'; a.textContent = shortUrl;
+  left.appendChild(a);
+  var copy = document.createElement('button'); copy.className = 'copy-btn'; copy.textContent = '复制';
+  copy.onclick = function(){ copyText(shortUrl, copy); };
+  d.appendChild(left); d.appendChild(copy);
+  return d;
+}
+function copyText(text, btn){
+  var restore = function(){ btn.textContent = '复制'; };
+  var done = function(){ btn.textContent = '已复制'; setTimeout(restore, 1200); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, function(){ fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+}
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
 function renderResult(data){
   var box = el('result');
   box.innerHTML = '';
   if (data.error){ el('msg').textContent = '错误: ' + data.error; return; }
   if (data.results){
     data.results.forEach(function(it){
-      var d = document.createElement('div'); d.className = 'item';
-      if (it.error){ d.textContent = it.url + ' → ' + it.error; }
-      else { var a = document.createElement('a'); a.className = 'code'; a.href = it.shortUrl; a.target = '_blank'; a.textContent = it.shortUrl; d.appendChild(a); }
-      box.appendChild(d);
+      if (it.error){ var d = document.createElement('div'); d.className = 'item'; d.textContent = it.url + ' → ' + it.error; box.appendChild(d); }
+      else { box.appendChild(linkRow(it.shortUrl)); }
     });
     if (TOKEN) loadList(true);
     return;
   }
   if (data.shortUrl){
-    var d = document.createElement('div'); d.className = 'item';
-    var a = document.createElement('a'); a.className = 'code'; a.href = data.shortUrl; a.target = '_blank'; a.textContent = data.shortUrl;
-    d.appendChild(a); box.appendChild(d);
+    box.appendChild(linkRow(data.shortUrl));
     if (TOKEN) loadList(true);
   }
 }
@@ -383,6 +424,9 @@ el('loginBtn').onclick = toggleLogin;
 el('loginSubmit').onclick = submitLogin;
 el('loginCancel').onclick = closeLogin;
 el('loginModal').addEventListener('click', function(e){ if (e.target.classList.contains('modal-mask')) closeLogin(); });
+el('manageBtn').onclick = openManage;
+el('manageClose').onclick = closeManage;
+el('manageModal').addEventListener('click', function(e){ if (e.target.classList.contains('modal-mask')) closeManage(); });
 el('genBtn').onclick = gen;
 el('advBtn').onclick = toggleAdvanced;
 el('allToggle').onclick = toggleAll;
