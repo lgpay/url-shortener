@@ -1,11 +1,13 @@
 name = "url-shortener"
 main = "src/index.js"
-compatibility_date = "2024-09-23"
+compatibility_date = "2026-08-01"
 
-# KV 命名空间：先运行 `wrangler kv namespace create LINKS` 获取 id 填入下方
+# 自动开通 KV（automatic provisioning）：
+# 省略 id，部署时（含 GitHub 原生集成）由 Cloudflare 自动创建命名空间，
+# 以 worker 名（url-shortener）为前缀，无需手动创建或回填 id。
+# 注：自动开通为 Beta，需较新的 compatibility_date（见上）。
 [[kv_namespaces]]
 binding = "LINKS"
-id = "REPLACE_WITH_YOUR_KV_ID"
 
 # ADMIN_TOKEN 不要写在这里（公开仓库）。
 # 生产（含 GitHub 原生集成部署）：在 Cloudflare 控制台将该 Worker 的
