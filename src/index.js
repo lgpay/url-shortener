@@ -135,7 +135,6 @@ const ADMIN_HTML = `<!doctype html>
   main{ max-width:560px; margin:6vh auto 60px; padding:0 20px; }
   .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:32px; box-shadow:0 12px 40px rgba(15,23,42,.08); margin-bottom:18px; }
   h1{ font-size:26px; font-weight:800; margin:0 0 8px; letter-spacing:-.3px; }
-  h2{ font-size:16px; font-weight:700; margin:0; }
   .sub{ color:var(--muted); font-size:14px; margin:0 0 22px; line-height:1.6; }
   .row{ display:flex; gap:10px; }
   .row input{ flex:1; }
@@ -180,7 +179,6 @@ const ADMIN_HTML = `<!doctype html>
   .item .surl{ font-weight:700; color:var(--ink); text-decoration:none; font-size:15.5px; display:inline-flex; align-items:center; gap:6px; }
   .item .surl:hover{ color:var(--accent); }
   .item .orig{ color:var(--muted); font-size:12.5px; margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .muted{ color:var(--muted); font-size:12.5px; margin-top:4px; }
   .tag{ display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; margin-left:8px; vertical-align:middle; font-weight:600; }
   .tag.public{ background:var(--accent-soft); color:#4f46e5; }
   .tag.admin{ background:#ecfdf3; color:#067647; }
@@ -498,19 +496,19 @@ const NOT_FOUND_HTML = `<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/png;base64,${FAVICON}">
 <title>短链不存在</title>
-<style>
+  <style>
   * { box-sizing: border-box; }
   body{
     margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
-    background:linear-gradient(180deg,#f7f9fc 0%,#eef1f6 100%); color:#1a1a1a;
+    background:radial-gradient(1200px 600px at 50% -10%, #eef2ff 0%, #f7f9fc 45%, #eef1f6 100%); color:#0f172a;
   }
-  .card{ background:#fff; border:1px solid #e8ebef; border-radius:18px; padding:40px 44px; text-align:center; box-shadow:0 10px 30px rgba(20,30,50,.06); }
+  .card{ background:#fff; border:1px solid #e7ebf0; border-radius:20px; padding:44px 48px; text-align:center; box-shadow:0 12px 40px rgba(15,23,42,.08); }
   .code{ font-size:64px; font-weight:800; margin:0; letter-spacing:1px; }
-  .sub{ color:#8a8f98; font-size:15px; margin:10px 0 22px; }
-  a{ display:inline-block; background:#111; color:#fff; text-decoration:none; border-radius:12px; padding:11px 22px; font-size:15px; font-weight:600; }
+  .sub{ color:#64748b; font-size:15px; margin:10px 0 22px; }
+  a{ display:inline-block; background:#111827; color:#fff; text-decoration:none; border-radius:12px; padding:11px 22px; font-size:15px; font-weight:600; transition:opacity .15s; }
   a:hover{ opacity:.88; }
-</style>
+  </style>
 </head>
 <body>
   <div class="card">
@@ -575,11 +573,6 @@ export default {
         if (!target) return json({ error: "请输入链接" }, 400);
         let ttl;
         if (body.expireDays) ttl = parseInt(body.expireDays, 10) * 86400; // 以天为单位
-        else if (body.expireIn) ttl = parseInt(body.expireIn, 10);
-        else if (body.expireAt) {
-          ttl = Math.floor((Date.parse(body.expireAt) - Date.now()) / 1000);
-          if (ttl <= 0) return json({ error: "有效期需晚于当前时间" }, 400);
-        }
         const code = await createOne(env, { url: target, custom: body.custom, ttl, source: "admin" });
         return json({ code, shortUrl: url.origin + "/" + code });
       }
