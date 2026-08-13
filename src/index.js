@@ -158,9 +158,12 @@ const ADMIN_HTML = `<!doctype html>
   #result{ margin-top:16px; }
   .item{
     background:#fbfbfc; border:1px solid var(--line); border-radius:12px;
-    padding:14px 16px; margin-top:10px; word-break:break-all;
+    padding:14px 16px; margin-top:10px; word-break:break-all; overflow:hidden;
+    max-height:300px;
     display:flex; justify-content:space-between; align-items:center; gap:12px;
+    transition:opacity .22s ease, transform .22s ease, max-height .22s ease, margin .22s ease, padding .22s ease;
   }
+  .item.removing{ opacity:0; transform:translateX(10px); max-height:0; margin-top:0; padding-top:0; padding-bottom:0; border-color:transparent; }
   .item a.code{ font-weight:700; color:var(--ink); text-decoration:none; font-size:15px; }
   .item a.code:hover{ text-decoration:underline; }
   .muted{ color:var(--muted); font-size:12.5px; margin-top:4px; }
@@ -351,20 +354,30 @@ function addRow(link){
     a.appendChild(tag);
   }
   var del = document.createElement('button'); del.className = 'del'; del.textContent = '删除';
-  del.onclick = function(){ delLink(link.code); };
+  del.onclick = function(){ delLink(link); };
   row.appendChild(left); row.appendChild(del);
   el('list').appendChild(row);
 }
-function delLink(code){
+function delLink(link){
+  var code = link.code;
+  // 乐观更新：点击即播放退出动画并移除该行，DELETE 在后台静默执行
+  var row = el('list').querySelector('[data-code="' + code + '"]');
+  if (row){
+    row.classList.add('removing');
+    setTimeout(function(){ if (row.parentNode) row.remove(); }, 240);
+  }
   fetch('/api/admin/links/' + code, { method:'DELETE', headers: apiHeaders() })
     .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
     .then(function(res){
-      if (!res.ok){ el('msg').textContent = '删除失败: ' + (res.d.error || '未知错误'); return; }
-      // 乐观删除：直接移除该行，避免 KV 最终一致导致列表短暂回显
-      var row = el('list').querySelector('[data-code="' + code + '"]');
-      if (row) row.remove();
+      if (!res.ok){
+        el('msg').textContent = '删除失败: ' + (res.d.error || '未知错误');
+        addRow(link); // 失败回滚：重新插入该行
+      }
     })
-    .catch(function(e){ el('msg').textContent = '删除失败: ' + e; });
+    .catch(function(e){
+      el('msg').textContent = '删除失败: ' + e;
+      addRow(link); // 网络异常回滚
+    });
 }
 el('loginBtn').onclick = toggleLogin;
 el('loginSubmit').onclick = submitLogin;
