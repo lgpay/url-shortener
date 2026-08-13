@@ -236,7 +236,7 @@ const ADMIN_HTML = `<!doctype html>
     <div class="modal-head">
       <h3>短链列表</h3>
       <div class="modal-head-actions">
-        <button id="allToggle" class="btn-ghost sm">管理所有短链</button>
+        <button id="allToggle" class="btn-ghost sm">所有</button>
         <button id="manageClose" class="btn-ghost sm">关闭</button>
       </div>
     </div>
@@ -260,7 +260,7 @@ const ADMIN_HTML = `<!doctype html>
 <script>
 var TOKEN = localStorage.getItem('admin_token') || '';
 var listCursor = null;
-var showAll = false;
+var showAll = true;
 function el(id){ return document.getElementById(id); }
 function apiHeaders(){
   var h = { 'Content-Type': 'application/json' };
@@ -271,7 +271,7 @@ function setLoggedIn(on){
   el('loginBtn').textContent = on ? '退出' : '登录';
   el('adminOnly').classList.toggle('hidden', !on);
   el('manageBtn').classList.toggle('hidden', !on);
-  if (!on){ el('allToggle').textContent = '管理所有短链'; showAll = false; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); }
+  if (!on){ el('allToggle').textContent = '所有'; showAll = true; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); }
 }
 function openLogin(){
   el('loginModal').classList.remove('hidden');
@@ -377,7 +377,7 @@ function loadList(reset){
 }
 function toggleAll(){
   showAll = !showAll;
-  el('allToggle').textContent = showAll ? '仅看我的短链' : '管理所有短链';
+  el('allToggle').textContent = showAll ? '所有' : '我的';
   loadList(true);
 }
 function addRow(link){
