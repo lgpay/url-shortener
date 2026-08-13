@@ -270,6 +270,12 @@ function apiHeaders(){
   if (TOKEN) h['Authorization'] = 'Bearer ' + TOKEN;
   return h;
 }
+function clearForm(){
+  el('url').value = ''; el('result').innerHTML = '';
+  el('custom').value = ''; el('expireDays').value = ''; el('batch').value = '';
+  el('advPanel').classList.add('hidden'); el('advBtn').textContent = '高级选项 ▾';
+  el('msg').textContent = '';
+}
 function setLoggedIn(on){
   el('loginBtn').textContent = on ? '退出' : '登录';
   el('adminOnly').classList.toggle('hidden', !on);
@@ -278,10 +284,7 @@ function setLoggedIn(on){
     el('allToggle').textContent = '我的'; showAll = true;
     el('list').innerHTML = ''; el('manageModal').classList.add('hidden');
     el('tokenInput').value = '';
-    el('url').value = ''; el('result').innerHTML = '';
-    el('custom').value = ''; el('expireDays').value = ''; el('batch').value = '';
-    el('advPanel').classList.add('hidden'); el('advBtn').textContent = '高级选项 ▾';
-    el('msg').textContent = '';
+    clearForm();
   }
 }
 function openLogin(){
@@ -309,7 +312,7 @@ function submitLogin(){
   if (!t) return;
   el('loginMsg').textContent = '';
   validateToken(t,
-    function(){ closeLogin(); setLoggedIn(true); loadList(true); },
+    function(){ closeLogin(); clearForm(); setLoggedIn(true); loadList(true); },
     function(){ el('loginMsg').textContent = 'Token 无效，请重试'; }
   );
 }
