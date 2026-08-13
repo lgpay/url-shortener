@@ -500,7 +500,7 @@ export default {
       // 管理后台页
       if (path === "/" && method === "GET") {
         return new Response(ADMIN_HTML, {
-          headers: { "Content-Type": "text/html; charset=utf-8" },
+          headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
         });
       }
 
