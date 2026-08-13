@@ -85,11 +85,11 @@ async function saveLink(env, { url, code, source, ttl }) {
 }
 
 async function createOne(env, { url, custom, ttl, source }) {
-  if (!isSafeUrl(url)) throw new Error("URL 非法或存在安全风险");
+  if (!isSafeUrl(url)) throw new Error("链接不合法");
   let code;
   if (custom) {
     code = custom;
-    if (await env.LINKS.get("link:" + code)) throw new Error("自定义短码已被占用");
+    if (await env.LINKS.get("link:" + code)) throw new Error("短码已被占用");
   } else {
     code = await genUniqueCode(source === "admin" ? ADMIN_CODE_LEN : PUBLIC_CODE_LEN, env.LINKS);
   }
@@ -238,7 +238,7 @@ const ADMIN_HTML = `<!doctype html>
     <div class="modal-head">
       <h3>短链列表</h3>
       <div class="modal-head-actions">
-        <button id="allToggle" class="btn-ghost sm">所有</button>
+        <button id="allToggle" class="btn-ghost sm">我的</button>
         <button id="manageClose" class="btn-ghost sm">关闭</button>
       </div>
     </div>
@@ -252,7 +252,7 @@ const ADMIN_HTML = `<!doctype html>
   <div class="modal-card">
     <h3>管理员登录</h3>
     <p class="sub">输入 ADMIN_TOKEN 以管理短链</p>
-    <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN" />
+    <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN" autocomplete="new-password" />
     <p id="loginMsg" class="modal-err"></p>
     <div class="modal-actions">
       <button id="loginCancel" class="btn-ghost">取消</button>
@@ -274,7 +274,7 @@ function setLoggedIn(on){
   el('loginBtn').textContent = on ? '退出' : '登录';
   el('adminOnly').classList.toggle('hidden', !on);
   el('manageBtn').classList.toggle('hidden', !on);
-  if (!on){ el('allToggle').textContent = '所有'; showAll = true; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); el('tokenInput').value = ''; }
+  if (!on){ el('allToggle').textContent = '我的'; showAll = true; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); el('tokenInput').value = ''; }
 }
 function openLogin(){
   el('loginModal').classList.remove('hidden');
@@ -334,7 +334,7 @@ function gen(){
   fetch(endpoint, { method:'POST', headers: apiHeaders(), body: JSON.stringify(body) })
     .then(function(r){ return r.json(); })
     .then(renderResult)
-    .catch(function(e){ el('msg').textContent = '请求失败: ' + e; });
+    .catch(function(e){ el('msg').textContent = '网络异常，请重试'; });
 }
 function linkRow(shortUrl){
   var d = document.createElement('div'); d.className = 'item';
@@ -363,7 +363,7 @@ function fallbackCopy(text){
 function renderResult(data){
   var box = el('result');
   box.innerHTML = '';
-  if (data.error){ el('msg').textContent = '错误: ' + data.error; return; }
+  if (data.error){ el('msg').textContent = data.error; return; }
   if (data.results){
     data.results.forEach(function(it){
       if (it.error){ var d = document.createElement('div'); d.className = 'item'; d.textContent = it.url + ' → ' + it.error; box.appendChild(d); }
@@ -389,11 +389,11 @@ function loadList(reset){
       listCursor = data.cursor;
       el('moreBtn').classList.toggle('hidden', !listCursor);
     })
-    .catch(function(e){ el('msg').textContent = '加载列表失败: ' + e; });
+    .catch(function(e){ el('msg').textContent = '列表加载失败，请重试'; });
 }
 function toggleAll(){
   showAll = !showAll;
-  el('allToggle').textContent = showAll ? '所有' : '我的';
+  el('allToggle').textContent = showAll ? '我的' : '所有';
   loadList(true);
 }
 function addRow(link){
@@ -427,12 +427,12 @@ function delLink(link){
     .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
     .then(function(res){
       if (!res.ok){
-        el('msg').textContent = '删除失败: ' + (res.d.error || '未知错误');
+        el('msg').textContent = '删除失败，请重试';
         addRow(link); // 失败回滚：重新插入该行
       }
     })
     .catch(function(e){
-      el('msg').textContent = '删除失败: ' + e;
+      el('msg').textContent = '删除失败，请重试';
       addRow(link); // 网络异常回滚
     });
 }
@@ -503,8 +503,8 @@ export default {
         }
         const body = await request.json().catch(() => ({}));
         const target = body.url;
-        if (!target) return json({ error: "缺少 url 字段" }, 400);
-        if (!isSafeUrl(target)) return json({ error: "URL 非法或存在安全风险" }, 400);
+        if (!target) return json({ error: "请输入链接" }, 400);
+        if (!isSafeUrl(target)) return json({ error: "链接不合法" }, 400);
         const code = await createOne(env, { url: target, source: "public", ttl: PUBLIC_TTL });
         return json({ code, shortUrl: url.origin + "/" + code });
       }
@@ -527,13 +527,13 @@ export default {
           return json({ results });
         }
         const target = body.url;
-        if (!target) return json({ error: "缺少 url 字段" }, 400);
+        if (!target) return json({ error: "请输入链接" }, 400);
         let ttl;
         if (body.expireDays) ttl = parseInt(body.expireDays, 10) * 86400; // 以天为单位
         else if (body.expireIn) ttl = parseInt(body.expireIn, 10);
         else if (body.expireAt) {
           ttl = Math.floor((Date.parse(body.expireAt) - Date.now()) / 1000);
-          if (ttl <= 0) return json({ error: "expireAt 必须晚于当前时间" }, 400);
+          if (ttl <= 0) return json({ error: "有效期需晚于当前时间" }, 400);
         }
         const code = await createOne(env, { url: target, custom: body.custom, ttl, source: "admin" });
         return json({ code, shortUrl: url.origin + "/" + code });
