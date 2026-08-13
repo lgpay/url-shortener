@@ -114,51 +114,134 @@ const ADMIN_HTML = `<!doctype html>
 <title>短链服务</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; background:#f7f7f8; color:#222; }
-  header { display:flex; justify-content:flex-end; padding:16px 20px; }
-  main { max-width:560px; margin:6vh auto; padding:0 20px; }
-  h1 { font-size:20px; font-weight:600; margin:0 0 24px; }
-  input, textarea, button { font-size:15px; border-radius:10px; border:1px solid #ddd; padding:12px 14px; width:100%; background:#fff; }
-  textarea { resize:vertical; min-height:80px; }
-  .row { display:flex; gap:10px; }
-  button { width:auto; background:#222; color:#fff; border:none; cursor:pointer; padding:12px 20px; }
-  button:hover { opacity:.9; }
-  #loginBtn { width:auto; }
-  .field { margin-top:12px; }
-  .hidden { display:none; }
-  #result { margin-top:20px; }
-  .item { background:#fff; border:1px solid #eee; border-radius:10px; padding:12px 14px; margin-top:10px; word-break:break-all; }
-  .muted { color:#888; font-size:13px; margin-top:4px; }
-  .list .item { display:flex; justify-content:space-between; align-items:center; gap:10px; }
-  a { color:#222; text-decoration:none; }
-  a:hover { text-decoration:underline; }
-  .del { background:#d33; padding:6px 12px; font-size:13px; }
-  #msg { margin-top:14px; color:#c33; font-size:14px; }
+  :root{
+    --card:#fff; --ink:#1a1a1a; --muted:#8a8f98; --line:#e8ebef;
+    --primary:#111; --danger:#e5484d; --accent:#4f46e5;
+  }
+  html, body { margin:0; padding:0; }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#f7f9fc 0%,#eef1f6 100%);
+    color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  header{ display:flex; align-items:center; justify-content:space-between; padding:18px 24px; max-width:720px; margin:0 auto; }
+  .brand{ font-weight:700; font-size:16px; letter-spacing:.3px; }
+  main{ max-width:560px; margin:4vh auto 60px; padding:0 20px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px; box-shadow:0 10px 30px rgba(20,30,50,.06); margin-bottom:20px; }
+  h1{ font-size:22px; font-weight:700; margin:0 0 6px; }
+  h2{ font-size:16px; font-weight:700; margin:0; }
+  .sub{ color:var(--muted); font-size:13px; margin:0 0 18px; }
+  .row{ display:flex; gap:10px; }
+  input, textarea{
+    width:100%; font-size:15px; color:var(--ink); background:#fbfbfc;
+    border:1px solid var(--line); border-radius:12px; padding:13px 15px; outline:none;
+    transition:border-color .15s, box-shadow .15s; font-family:inherit;
+  }
+  input:focus, textarea:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(17,17,17,.08); background:#fff; }
+  textarea{ resize:vertical; min-height:96px; line-height:1.5; }
+  .field{ margin-top:14px; }
+  label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+  .btn-primary{
+    background:var(--primary); color:#fff; border:none; border-radius:12px;
+    padding:0 22px; font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap; height:48px;
+    transition:opacity .15s;
+  }
+  .btn-primary:hover{ opacity:.88; }
+  button{ font-family:inherit; }
+  .btn-ghost{
+    background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:10px;
+    padding:9px 16px; font-size:14px; cursor:pointer; transition:background .15s, border-color .15s;
+  }
+  .btn-ghost:hover{ background:#f6f7f9; border-color:#d8dce2; }
+  .btn-ghost.sm{ padding:6px 12px; font-size:13px; }
+  .btn-link{ background:none; border:none; color:var(--accent); font-size:13px; cursor:pointer; padding:14px 0 0; font-weight:600; }
+  #result{ margin-top:16px; }
+  .item{
+    background:#fbfbfc; border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin-top:10px; word-break:break-all;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .item a.code{ font-weight:700; color:var(--ink); text-decoration:none; font-size:15px; }
+  .item a.code:hover{ text-decoration:underline; }
+  .muted{ color:var(--muted); font-size:12.5px; margin-top:4px; }
+  .list-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .tag{ display:inline-block; font-size:11px; padding:1px 7px; border-radius:6px; margin-left:8px; vertical-align:middle; }
+  .tag.public{ background:#eef2ff; color:#4f46e5; }
+  .tag.admin{ background:#ecfdf3; color:#067647; }
+  .del{ background:var(--danger); color:#fff; border:none; border-radius:9px; padding:7px 13px; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .del:hover{ opacity:.9; }
+  .empty{ color:var(--muted); text-align:center; padding:24px 0; font-size:14px; }
+  #msg{ margin:14px 2px; color:var(--danger); font-size:14px; min-height:1px; }
+  .hidden{ display:none !important; }
+  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:50; }
+  .modal-mask{ position:absolute; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(2px); }
+  .modal-card{ position:relative; background:#fff; border-radius:18px; padding:26px; width:360px; max-width:90vw; box-shadow:0 20px 60px rgba(15,23,42,.25); }
+  .modal-card h3{ margin:0 0 4px; font-size:18px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:18px; }
 </style>
 </head>
 <body>
-<header><button id="loginBtn">登录</button></header>
+<header>
+  <div class="brand">短链</div>
+  <button id="loginBtn" class="btn-ghost">登录</button>
+</header>
 <main>
-  <h1>短链接</h1>
-  <div class="row">
-    <input id="url" placeholder="粘贴要缩短的长链接…" />
-    <button id="genBtn">生成</button>
+  <div class="card">
+    <h1>短链接</h1>
+    <p class="sub">把长链接变成清爽的短链接</p>
+    <div class="row">
+      <input id="url" placeholder="粘贴要缩短的长链接…" />
+      <button id="genBtn" class="btn-primary">生成</button>
+    </div>
+
+    <div id="adminOnly" class="hidden">
+      <div class="field">
+        <label>自定义短码（可选）</label>
+        <input id="custom" placeholder="例如：my-link" />
+      </div>
+      <button id="advBtn" class="btn-link">高级选项 ▾</button>
+      <div id="advPanel" class="hidden">
+        <div class="field">
+          <label>有效期（天，可选；留空=长期）</label>
+          <input id="expireDays" type="number" min="1" placeholder="例如：30" />
+        </div>
+        <div class="field">
+          <label>批量生成（每行一个 URL）</label>
+          <textarea id="batch" placeholder="https://example.com/a&#10;https://example.com/b"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="result"></div>
   </div>
-  <div id="adminFields" class="hidden">
-    <div class="field"><input id="custom" placeholder="自定义短码（可选）" /></div>
-    <div class="field"><input id="expire" placeholder="有效期（秒，可选；留空=长期）" /></div>
-    <div class="field"><textarea id="batch" placeholder="批量：每行一个 URL（可选）"></textarea></div>
-  </div>
-  <div id="result"></div>
-  <div id="listWrap" class="list hidden">
-    <h1 style="margin-top:36px">我的短链</h1>
+
+  <div id="listWrap" class="card hidden">
+    <div class="list-head">
+      <h2>我的短链</h2>
+      <button id="allToggle" class="btn-ghost sm">管理所有短链</button>
+    </div>
     <div id="list"></div>
-    <button id="moreBtn" class="hidden" style="margin-top:12px">加载更多</button>
+    <button id="moreBtn" class="btn-ghost sm hidden">加载更多</button>
   </div>
   <div id="msg"></div>
 </main>
+
+<div id="loginModal" class="modal hidden">
+  <div class="modal-mask"></div>
+  <div class="modal-card">
+    <h3>管理员登录</h3>
+    <p class="sub">输入 ADMIN_TOKEN 以管理短链</p>
+    <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN" />
+    <div class="modal-actions">
+      <button id="loginCancel" class="btn-ghost">取消</button>
+      <button id="loginSubmit" class="btn-primary">登录</button>
+    </div>
+  </div>
+</div>
 <script>
 var TOKEN = localStorage.getItem('admin_token') || '';
+var listCursor = null;
+var showAll = false;
 function el(id){ return document.getElementById(id); }
 function apiHeaders(){
   var h = { 'Content-Type': 'application/json' };
@@ -166,14 +249,29 @@ function apiHeaders(){
   return h;
 }
 function setLoggedIn(on){
-  el('loginBtn').textContent = on ? '退出登录' : '登录';
-  el('adminFields').classList.toggle('hidden', !on);
+  el('loginBtn').textContent = on ? '退出' : '登录';
+  el('adminOnly').classList.toggle('hidden', !on);
   el('listWrap').classList.toggle('hidden', !on);
+  if (!on){ el('allToggle').textContent = '管理所有短链'; showAll = false; el('list').innerHTML = ''; }
 }
-function login(){
-  if (TOKEN) { TOKEN=''; localStorage.removeItem('admin_token'); setLoggedIn(false); return; }
-  var t = prompt('请输入管理员 Token');
-  if (t) { TOKEN = t.trim(); localStorage.setItem('admin_token', TOKEN); setLoggedIn(true); loadList(true); }
+function openLogin(){
+  el('loginModal').classList.remove('hidden');
+  setTimeout(function(){ el('tokenInput').focus(); }, 50);
+}
+function closeLogin(){ el('loginModal').classList.add('hidden'); el('tokenInput').value = ''; }
+function submitLogin(){
+  var t = el('tokenInput').value.trim();
+  if (!t) return;
+  TOKEN = t; localStorage.setItem('admin_token', TOKEN);
+  closeLogin(); setLoggedIn(true); loadList(true);
+}
+function toggleLogin(){
+  if (TOKEN){ TOKEN = ''; localStorage.removeItem('admin_token'); setLoggedIn(false); }
+  else openLogin();
+}
+function toggleAdvanced(){
+  var hidden = el('advPanel').classList.toggle('hidden');
+  el('advBtn').textContent = hidden ? '高级选项 ▾' : '高级选项 ▴';
 }
 function gen(){
   el('msg').textContent = '';
@@ -182,19 +280,16 @@ function gen(){
   var isAdmin = !!TOKEN;
   var endpoint, body;
   if (isAdmin && batchVal){
-    var urls = batchVal.split('\\n').map(function(s){return s.trim();}).filter(Boolean);
-    endpoint = '/api/admin/shorten';
-    body = { urls: urls };
+    var urls = batchVal.split('\\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    endpoint = '/api/admin/shorten'; body = { urls: urls };
   } else if (isAdmin){
-    endpoint = '/api/admin/shorten';
-    body = { url: urlVal };
+    endpoint = '/api/admin/shorten'; body = { url: urlVal };
     var custom = el('custom').value.trim();
-    var exp = el('expire').value.trim();
+    var days = el('expireDays').value.trim();
     if (custom) body.custom = custom;
-    if (exp) body.expireIn = parseInt(exp, 10);
+    if (days) body.expireDays = parseInt(days, 10);
   } else {
-    endpoint = '/api/shorten';
-    body = { url: urlVal };
+    endpoint = '/api/shorten'; body = { url: urlVal };
   }
   fetch(endpoint, { method:'POST', headers: apiHeaders(), body: JSON.stringify(body) })
     .then(function(r){ return r.json(); })
@@ -207,43 +302,55 @@ function renderResult(data){
   if (data.error){ el('msg').textContent = '错误: ' + data.error; return; }
   if (data.results){
     data.results.forEach(function(it){
-      var d = document.createElement('div'); d.className='item';
+      var d = document.createElement('div'); d.className = 'item';
       if (it.error){ d.textContent = it.url + ' → ' + it.error; }
-      else { var a=document.createElement('a'); a.href=it.shortUrl; a.target='_blank'; a.textContent=it.shortUrl; d.appendChild(a); }
+      else { var a = document.createElement('a'); a.className = 'code'; a.href = it.shortUrl; a.target = '_blank'; a.textContent = it.shortUrl; d.appendChild(a); }
       box.appendChild(d);
     });
     if (TOKEN) loadList(true);
     return;
   }
   if (data.shortUrl){
-    var d = document.createElement('div'); d.className='item';
-    var a = document.createElement('a'); a.href=data.shortUrl; a.target='_blank'; a.textContent=data.shortUrl;
+    var d = document.createElement('div'); d.className = 'item';
+    var a = document.createElement('a'); a.className = 'code'; a.href = data.shortUrl; a.target = '_blank'; a.textContent = data.shortUrl;
     d.appendChild(a); box.appendChild(d);
     if (TOKEN) loadList(true);
   }
 }
-var listCursor = null;
 function loadList(reset){
-  if (reset){ listCursor = null; el('list').innerHTML=''; }
-  var q = listCursor ? ('?cursor=' + encodeURIComponent(listCursor)) : '';
+  if (reset){ listCursor = null; el('list').innerHTML = ''; }
+  var scope = showAll ? 'all' : 'mine';
+  var q = '?scope=' + scope + (listCursor ? ('&cursor=' + encodeURIComponent(listCursor)) : '');
   fetch('/api/admin/links' + q, { headers: apiHeaders() })
     .then(function(r){ return r.json(); })
     .then(function(data){
-      (data.links||[]).forEach(addRow);
+      if (reset && (!data.links || !data.links.length)){ el('list').innerHTML = '<div class="empty">暂无短链，去生成一个吧</div>'; }
+      else { (data.links || []).forEach(addRow); }
       listCursor = data.cursor;
       el('moreBtn').classList.toggle('hidden', !listCursor);
     })
     .catch(function(e){ el('msg').textContent = '加载列表失败: ' + e; });
 }
+function toggleAll(){
+  showAll = !showAll;
+  el('allToggle').textContent = showAll ? '仅看我的短链' : '管理所有短链';
+  loadList(true);
+}
 function addRow(link){
-  var row = document.createElement('div'); row.className='item';
-  var left = document.createElement('div');
-  var a = document.createElement('a'); a.href='/' + link.code; a.target='_blank'; a.textContent='/' + link.code;
-  var u = document.createElement('div'); u.className='muted'; u.textContent = link.url;
-  var exp = document.createElement('div'); exp.className='muted';
+  var row = document.createElement('div'); row.className = 'item';
+  var left = document.createElement('div'); left.style.flex = '1'; left.style.minWidth = '0';
+  var a = document.createElement('a'); a.className = 'code'; a.href = '/' + link.code; a.target = '_blank'; a.textContent = '/' + link.code;
+  var u = document.createElement('div'); u.className = 'muted'; u.textContent = link.url;
+  var exp = document.createElement('div'); exp.className = 'muted';
   exp.textContent = link.expireAt ? ('过期: ' + new Date(link.expireAt).toLocaleString()) : '永久';
   left.appendChild(a); left.appendChild(u); left.appendChild(exp);
-  var del = document.createElement('button'); del.className='del'; del.textContent='删除';
+  if (showAll){
+    var tag = document.createElement('span');
+    tag.className = 'tag ' + (link.source === 'public' ? 'public' : 'admin');
+    tag.textContent = link.source === 'public' ? '公开' : '管理员';
+    a.appendChild(tag);
+  }
+  var del = document.createElement('button'); del.className = 'del'; del.textContent = '删除';
   del.onclick = function(){ delLink(link.code); };
   row.appendChild(left); row.appendChild(del);
   el('list').appendChild(row);
@@ -253,9 +360,15 @@ function delLink(code){
     .then(function(){ loadList(true); })
     .catch(function(e){ el('msg').textContent = '删除失败: ' + e; });
 }
-el('loginBtn').onclick = login;
+el('loginBtn').onclick = toggleLogin;
+el('loginSubmit').onclick = submitLogin;
+el('loginCancel').onclick = closeLogin;
+el('loginModal').addEventListener('click', function(e){ if (e.target.classList.contains('modal-mask')) closeLogin(); });
 el('genBtn').onclick = gen;
+el('advBtn').onclick = toggleAdvanced;
+el('allToggle').onclick = toggleAll;
 el('moreBtn').onclick = function(){ loadList(false); };
+el('tokenInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') submitLogin(); });
 if (TOKEN) setLoggedIn(true);
 </script>
 </body>
@@ -312,7 +425,8 @@ export default {
         const target = body.url;
         if (!target) return json({ error: "缺少 url 字段" }, 400);
         let ttl;
-        if (body.expireIn) ttl = parseInt(body.expireIn, 10);
+        if (body.expireDays) ttl = parseInt(body.expireDays, 10) * 86400; // 以天为单位
+        else if (body.expireIn) ttl = parseInt(body.expireIn, 10);
         else if (body.expireAt) {
           ttl = Math.floor((Date.parse(body.expireAt) - Date.now()) / 1000);
           if (ttl <= 0) return json({ error: "expireAt 必须晚于当前时间" }, 400);
@@ -324,9 +438,10 @@ export default {
       // 管理员列表
       if (path === "/api/admin/links" && method === "GET") {
         if (!isAuthed(request, env)) return json({ error: "未授权" }, 401);
+        const scope = url.searchParams.get("scope") || "mine"; // mine=仅管理员, all=含公开
         const cursor = url.searchParams.get("cursor") || undefined;
         const listed = await env.LINKS.list({ prefix: "link:", cursor, limit: 50 });
-        const links = await Promise.all(
+        let links = await Promise.all(
           listed.keys.map(async (k) => {
             let meta = {};
             try {
@@ -335,6 +450,7 @@ export default {
             return { code: k.name.slice("link:".length), ...meta };
           })
         );
+        if (scope === "mine") links = links.filter((l) => l.source === "admin");
         return json({ links, cursor: listed.list_complete ? null : listed.cursor });
       }
 
