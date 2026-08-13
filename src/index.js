@@ -181,12 +181,14 @@ const ADMIN_HTML = `<!doctype html>
   .hidden{ display:none !important; }
   .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:50; }
   .modal-mask{ position:absolute; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(2px); }
-  .modal-card{ position:relative; background:#fff; border-radius:18px; padding:26px; width:360px; max-width:90vw; box-shadow:0 20px 60px rgba(15,23,42,.25); }
+  .modal-card{ position:relative; background:#fff; border-radius:18px; padding:26px; width:360px; max-width:90vw; max-height:86vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(15,23,42,.25); }
   .modal-card.wide{ width:560px; }
   .modal-card h3{ margin:0 0 4px; font-size:18px; }
   .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; }
   .modal-head-actions{ display:flex; gap:8px; }
   .modal-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:18px; }
+  #list{ overflow-y:auto; flex:1; min-height:0; margin-top:2px; }
+  .modal-err{ color:var(--danger); font-size:13px; margin:10px 0 0; min-height:1px; }
 </style>
 </head>
 <body>
@@ -251,6 +253,7 @@ const ADMIN_HTML = `<!doctype html>
     <h3>管理员登录</h3>
     <p class="sub">输入 ADMIN_TOKEN 以管理短链</p>
     <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN" />
+    <p id="loginMsg" class="modal-err"></p>
     <div class="modal-actions">
       <button id="loginCancel" class="btn-ghost">取消</button>
       <button id="loginSubmit" class="btn-primary">登录</button>
@@ -271,10 +274,12 @@ function setLoggedIn(on){
   el('loginBtn').textContent = on ? '退出' : '登录';
   el('adminOnly').classList.toggle('hidden', !on);
   el('manageBtn').classList.toggle('hidden', !on);
-  if (!on){ el('allToggle').textContent = '所有'; showAll = true; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); }
+  if (!on){ el('allToggle').textContent = '所有'; showAll = true; el('list').innerHTML = ''; el('manageModal').classList.add('hidden'); el('tokenInput').value = ''; }
 }
 function openLogin(){
   el('loginModal').classList.remove('hidden');
+  el('tokenInput').value = '';
+  el('loginMsg').textContent = '';
   setTimeout(function(){ el('tokenInput').focus(); }, 50);
 }
 function closeLogin(){ el('loginModal').classList.add('hidden'); el('tokenInput').value = ''; }
@@ -294,10 +299,10 @@ function validateToken(t, onOk, onFail){
 function submitLogin(){
   var t = el('tokenInput').value.trim();
   if (!t) return;
-  el('msg').textContent = '';
+  el('loginMsg').textContent = '';
   validateToken(t,
     function(){ closeLogin(); setLoggedIn(true); loadList(true); },
-    function(){ el('msg').textContent = 'Token 无效，请确认 Cloudflare 中 ADMIN_TOKEN 与此一致'; }
+    function(){ el('loginMsg').textContent = 'Token 无效，请确认 Cloudflare 中 ADMIN_TOKEN 与此一致'; }
   );
 }
 function toggleLogin(){
