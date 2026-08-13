@@ -251,8 +251,8 @@ const ADMIN_HTML = `<!doctype html>
   <div class="modal-mask"></div>
   <div class="modal-card">
     <h3>管理员登录</h3>
-    <p class="sub">输入 ADMIN_TOKEN 以管理短链</p>
-    <input id="tokenInput" type="password" placeholder="ADMIN_TOKEN" autocomplete="new-password" />
+    <p class="sub">输入管理员口令以管理短链</p>
+    <input id="tokenInput" type="password" placeholder="管理员口令" autocomplete="new-password" />
     <p id="loginMsg" class="modal-err"></p>
     <div class="modal-actions">
       <button id="loginCancel" class="btn-ghost">取消</button>
@@ -295,6 +295,8 @@ function openLogin(){
 }
 function closeLogin(){ el('loginModal').classList.add('hidden'); el('tokenInput').value = ''; }
 function openManage(){
+  showAll = true;
+  el('allToggle').textContent = '我的';
   el('manageModal').classList.remove('hidden');
   loadList(true);
 }
@@ -313,7 +315,7 @@ function submitLogin(){
   el('loginMsg').textContent = '';
   validateToken(t,
     function(){ closeLogin(); clearForm(); setLoggedIn(true); loadList(true); },
-    function(){ el('loginMsg').textContent = 'Token 无效，请重试'; }
+    function(){ el('loginMsg').textContent = '口令错误，请重试'; }
   );
 }
 function toggleLogin(){
