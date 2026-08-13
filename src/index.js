@@ -217,7 +217,7 @@ const ADMIN_HTML = `<!doctype html>
 
   <div id="listWrap" class="card hidden">
     <div class="list-head">
-      <h2>我的短链</h2>
+      <h2>短链列表</h2>
       <button id="allToggle" class="btn-ghost sm">管理所有短链</button>
     </div>
     <div id="list"></div>
@@ -380,9 +380,34 @@ if (TOKEN) setLoggedIn(true);
 </body>
 </html>`;
 
-const NOT_FOUND_HTML = `<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>404</title>
-<style>body{font-family:system-ui,sans-serif;background:#f7f7f8;color:#222;display:flex;height:100vh;align-items:center;justify-content:center;margin:0}div{text-align:center}h1{font-size:48px;margin:0}p{color:#888}</style>
-</head><body><div><h1>404</h1><p>短链接不存在或已过期</p></div></body></html>`;
+const NOT_FOUND_HTML = `<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>短链不存在</title>
+<style>
+  * { box-sizing: border-box; }
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(180deg,#f7f9fc 0%,#eef1f6 100%); color:#1a1a1a;
+  }
+  .card{ background:#fff; border:1px solid #e8ebef; border-radius:18px; padding:40px 44px; text-align:center; box-shadow:0 10px 30px rgba(20,30,50,.06); }
+  .code{ font-size:64px; font-weight:800; margin:0; letter-spacing:1px; }
+  .sub{ color:#8a8f98; font-size:15px; margin:10px 0 22px; }
+  a{ display:inline-block; background:#111; color:#fff; text-decoration:none; border-radius:12px; padding:11px 22px; font-size:15px; font-weight:600; }
+  a:hover{ opacity:.88; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <p class="code">404</p>
+    <p class="sub">短链接不存在或已过期</p>
+    <a href="/">返回首页</a>
+  </div>
+</body>
+</html>`;
 
 export default {
   async fetch(request, env, ctx) {
