@@ -195,12 +195,12 @@ const ADMIN_HTML = `<!doctype html>
     </div>
 
     <div id="adminOnly" class="hidden">
-      <div class="field">
-        <label>自定义短码（可选）</label>
-        <input id="custom" placeholder="例如：my-link" />
-      </div>
       <button id="advBtn" class="btn-link">高级选项 ▾</button>
       <div id="advPanel" class="hidden">
+        <div class="field">
+          <label>自定义短码（可选）</label>
+          <input id="custom" placeholder="例如：my-link" />
+        </div>
         <div class="field">
           <label>有效期（天，可选；留空=长期）</label>
           <input id="expireDays" type="number" min="1" placeholder="例如：30" />
@@ -337,7 +337,7 @@ function toggleAll(){
   loadList(true);
 }
 function addRow(link){
-  var row = document.createElement('div'); row.className = 'item';
+  var row = document.createElement('div'); row.className = 'item'; row.dataset.code = link.code;
   var left = document.createElement('div'); left.style.flex = '1'; left.style.minWidth = '0';
   var a = document.createElement('a'); a.className = 'code'; a.href = '/' + link.code; a.target = '_blank'; a.textContent = '/' + link.code;
   var u = document.createElement('div'); u.className = 'muted'; u.textContent = link.url;
@@ -357,7 +357,13 @@ function addRow(link){
 }
 function delLink(code){
   fetch('/api/admin/links/' + code, { method:'DELETE', headers: apiHeaders() })
-    .then(function(){ loadList(true); })
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+    .then(function(res){
+      if (!res.ok){ el('msg').textContent = '删除失败: ' + (res.d.error || '未知错误'); return; }
+      // 乐观删除：直接移除该行，避免 KV 最终一致导致列表短暂回显
+      var row = el('list').querySelector('[data-code="' + code + '"]');
+      if (row) row.remove();
+    })
     .catch(function(e){ el('msg').textContent = '删除失败: ' + e; });
 }
 el('loginBtn').onclick = toggleLogin;
